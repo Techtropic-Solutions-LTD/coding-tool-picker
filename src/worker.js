@@ -1,6 +1,5 @@
-// TypeSafe SDK integration (install with: npm install @typesafe-ai/sdk)
-// Uncomment when the SDK is available:
-// import { TypeSafeClient } from '@typesafe-ai/sdk';
+// TypeSafe API endpoint
+const TYPESAFE_API = 'https://api.typesafe.ai/v1/systemone';
 
 // For now, import engine directly for bundling
 // In production these will be bundled by Wrangler
@@ -247,14 +246,10 @@ async function handleDecide(request, env) {
         corsHeaders(origin)
       );
     }
-    */
-    
-    // Temporary fallback until SDK is integrated
-    throw new Error('TypeSafe SDK integration pending');
     
   } catch (err) {
-    // Client creation failed: fall back to rules
-    console.error('TypeSafe client error:', err.message);
+    // API call failed: fall back to rules
+    console.error('TypeSafe API error:', err.message);
     const offline = Engine.decideOffline(MODEL, { answers });
     
     return jsonResponse(
@@ -262,7 +257,7 @@ async function handleDecide(request, env) {
         decision: offline.output.decision,
         confidence: offline.confidence,
         source: 'rules_fallback',
-        error: 'client_error',
+        error: 'api_error',
         agrees_with_rules: true,
         ranking: offline.output.ranking,
         output: offline.output
