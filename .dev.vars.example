@@ -1,0 +1,4 @@
+# TypeSafe API key for live Jev decisions
+# Get yours at https://typesafe.ai
+# Set in production with: wrangler secret put TYPESAFE_API_KEY
+TYPESAFE_API_KEY=your-typesafe-api-key-here

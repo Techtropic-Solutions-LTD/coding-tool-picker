@@ -1,0 +1,2332 @@
+{
+ "rules_id": "choose_coding_plan",
+ "rules_version": "2026-10-06.1",
+ "as_of": "Oct 5-6, 2026",
+ "thresholds": {
+  "tie": 0.03,
+  "weak": 0.5,
+  "min_pull": 1.5,
+  "up": 2,
+  "down": 0.5,
+  "unlock_gain": 0.05,
+  "setup_penalty": 0.8,
+  "lock_all": 7,
+  "lock_some": 2.5,
+  "combo_turnkey_step": 0.25
+ },
+ "confidence": {
+  "none": 0,
+  "weak": 0.45,
+  "close": 0.6,
+  "clear": 0.75,
+  "decisive": 0.9,
+  "decisive_gap": 0.06
+ },
+ "sources": {
+  "report_main": {
+   "label": "Our report: Cursor vs Claude Code vs Codex (Oct 5, 2026)",
+   "url": ""
+  },
+  "report_dots": {
+   "label": "Our report: Dots vs Grok Bot (Oct 5, 2026)",
+   "url": ""
+  },
+  "notes_oct6": {
+   "label": "Research figures supplied with this brief (Oct 6, 2026)",
+   "url": ""
+  },
+  "cursor_pricing": {
+   "label": "Cursor help: Pricing and plans",
+   "url": "https://cursor.com/help/account-and-billing/pricing.md"
+  },
+  "cursor_models": {
+   "label": "Cursor docs: Models and pricing",
+   "url": "https://cursor.com/docs/models-and-pricing"
+  },
+  "cursor_cloud": {
+   "label": "Cursor docs: Cloud Agents",
+   "url": "https://cursor.com/docs/cloud-agent"
+  },
+  "cursor_cli": {
+   "label": "Cursor docs: CLI overview",
+   "url": "https://cursor.com/docs/cli/overview"
+  },
+  "cursor_grok47": {
+   "label": "Cursor docs: Grok 4.7 model page",
+   "url": "https://cursor.com/docs/models/grok-4-7"
+  },
+  "grokbot": {
+   "label": "Cursor docs: Grok Bot overview",
+   "url": "https://cursor.com/docs/grok-bot"
+  },
+  "grokbot_teams": {
+   "label": "Grok Bot docs: teams and enterprises",
+   "url": "https://docs.x.ai/grok-bot/teams-and-enterprises"
+  },
+  "grokbot_plans": {
+   "label": "Cursor help: Grok Bot plans and billing",
+   "url": "https://cursor.com/help/grok-bot/plans.md"
+  },
+  "grokbot_routines": {
+   "label": "Cursor help: Grok Bot routines",
+   "url": "https://cursor.com/help/grok-bot/routines"
+  },
+  "claude_pricing": {
+   "label": "Claude pricing page",
+   "url": "https://claude.com/pricing"
+  },
+  "claude_max": {
+   "label": "Anthropic Help: What is the Max plan?",
+   "url": "https://support.claude.com/en/articles/11049741-what-is-the-max-plan"
+  },
+  "claude_code": {
+   "label": "Claude Code docs: Overview",
+   "url": "https://code.claude.com/docs/en/overview"
+  },
+  "claude_model_config": {
+   "label": "Claude Code docs: Model configuration",
+   "url": "https://code.claude.com/docs/en/model-config"
+  },
+  "claude_limits": {
+   "label": "Anthropic Help: Models, usage, and limits in Claude Code",
+   "url": "https://support.claude.com/en/articles/14552983-models-usage-and-limits-in-claude-code"
+  },
+  "claude_legal": {
+   "label": "Claude Code docs: Legal and compliance",
+   "url": "https://code.claude.com/docs/en/legal-and-compliance"
+  },
+  "claude_tag": {
+   "label": "Anthropic: Introducing Claude Tag",
+   "url": "https://www.anthropic.com/news/introducing-claude-tag"
+  },
+  "anthropic_models": {
+   "label": "Anthropic docs: Models overview",
+   "url": "https://platform.claude.com/docs/en/about-claude/models/overview"
+  },
+  "opus55": {
+   "label": "Anthropic: Claude Opus 5.5",
+   "url": "https://www.anthropic.com/claude-opus-5-5"
+  },
+  "codex_pricing": {
+   "label": "OpenAI: Codex pricing",
+   "url": "https://developers.openai.com/codex/pricing"
+  },
+  "codex_docs": {
+   "label": "OpenAI Codex docs",
+   "url": "https://developers.openai.com/codex"
+  },
+  "openai_models": {
+   "label": "OpenAI API docs: model pages",
+   "url": "https://developers.openai.com/api/docs/models"
+  },
+  "astra": {
+   "label": "OpenAI: GPT-6 Astra",
+   "url": "https://openai.com/index/gpt-6-astra/"
+  },
+  "dots": {
+   "label": "OpenAI: Introducing dots",
+   "url": "https://openai.com/index/introducing-dots/"
+  },
+  "sign_in_chatgpt": {
+   "label": "OpenAI Cookbook: Sign in with ChatGPT",
+   "url": "https://developers.openai.com/cookbook/articles/sign-in-with-chatgpt"
+  },
+  "aa_index": {
+   "label": "AA Coding Agent Index (BenchLM mirror)",
+   "url": "https://benchlm.ai/benchmarks/aacodingagents"
+  },
+  "aa_tb4": {
+   "label": "Artificial Analysis: Terminal-Bench 4.0",
+   "url": "https://artificialanalysis.ai/evaluations/terminalbench-4-0"
+  },
+  "aa_grok": {
+   "label": "Artificial Analysis: Benchmarking Grok 4.7",
+   "url": "https://artificialanalysis.ai/articles/benchmarking-grok-4-7"
+  },
+  "aievals_grok": {
+   "label": "AIEvals: Grok 4.7 (mirror)",
+   "url": "https://aievals.app/models/grok-4-7"
+  }
+ },
+ "families": {
+  "cursor": {
+   "name": "Cursor",
+   "maker": "Cursor"
+  },
+  "claude": {
+   "name": "Claude Code",
+   "maker": "Anthropic"
+  },
+  "chatgpt": {
+   "name": "Codex",
+   "maker": "OpenAI"
+  },
+  "api": {
+   "name": "API keys",
+   "maker": "Anthropic and OpenAI"
+  }
+ },
+ "components": {
+  "cursor_pro": {
+   "family": "cursor",
+   "name": "Cursor Pro",
+   "price": 20,
+   "f": {
+    "headroom": [
+     0.25,
+     {
+      "t": "Includes $20 of Other Models usage a month; the Cursor Models pool size is not published.",
+      "s": [
+       "cursor_pricing",
+       "cursor_models"
+      ],
+      "u": "Cursor publishes no pool sizes"
+     }
+    ]
+   }
+  },
+  "cursor_proplus": {
+   "family": "cursor",
+   "name": "Cursor Pro+",
+   "price": 60,
+   "f": {
+    "headroom": [
+     0.5,
+     {
+      "t": "Includes $70 of Other Models usage a month and more Grok Bot usage than Pro.",
+      "s": [
+       "cursor_pricing",
+       "grokbot_plans"
+      ],
+      "u": "Grok Bot weekly amounts are not published"
+     }
+    ]
+   }
+  },
+  "cursor_ultra": {
+   "family": "cursor",
+   "name": "Cursor Ultra",
+   "price": 200,
+   "f": {
+    "headroom": [
+     1,
+     {
+      "t": "Includes $400 of third-party model usage and the highest Grok Bot allowance.",
+      "s": [
+       "cursor_pricing",
+       "report_main"
+      ]
+     }
+    ]
+   }
+  },
+  "claude_pro": {
+   "family": "claude",
+   "name": "Claude Pro",
+   "price": 20,
+   "f": {
+    "headroom": [
+     0.25,
+     {
+      "t": "Five-hour window plus a weekly cap, shared with Claude chat.",
+      "s": [
+       "claude_limits",
+       "claude_pricing"
+      ]
+     }
+    ]
+   }
+  },
+  "claude_max5": {
+   "family": "claude",
+   "name": "Claude Max 5x",
+   "price": 100,
+   "f": {
+    "headroom": [
+     0.75,
+     {
+      "t": "Five times Pro per session. Anthropic publishes multipliers, not dollar allowances.",
+      "s": [
+       "claude_max"
+      ],
+      "u": "Not confirmed that Max 5x holds a heavy (about $460/month API-rate) pace"
+     }
+    ]
+   }
+  },
+  "claude_max20": {
+   "family": "claude",
+   "name": "Claude Max 20x",
+   "price": 200,
+   "f": {
+    "headroom": [
+     1,
+     {
+      "t": "Twenty times Pro; our report calls it the safer tier if Claude use stays heavy.",
+      "s": [
+       "claude_max",
+       "report_main"
+      ],
+      "u": "Anthropic publishes multipliers, not dollar allowances"
+     }
+    ]
+   }
+  },
+  "chatgpt_plus": {
+   "family": "chatgpt",
+   "name": "ChatGPT Plus",
+   "price": 20,
+   "f": {
+    "headroom": [
+     0.25,
+     {
+      "t": "\"A few focused coding sessions each week\": roughly 15 to 160 GPT-6.1 Sol messages per five hours.",
+      "s": [
+       "codex_pricing"
+      ]
+     }
+    ],
+    "personal_agent": [
+     0,
+     {
+      "t": "No dot on Plus. Dots need ChatGPT Pro or higher.",
+      "s": [
+       "dots"
+      ]
+     }
+    ]
+   }
+  },
+  "chatgpt_pro": {
+   "family": "chatgpt",
+   "name": "ChatGPT Pro ($100)",
+   "price": 100,
+   "f": {
+    "headroom": [
+     0.75,
+     {
+      "t": "No five-hour limit right now; weekly limits may apply and are not published.",
+      "s": [
+       "codex_pricing"
+      ],
+      "u": "Pro weekly limits and the $100 vs $200 vs $500 differences are not published"
+     }
+    ],
+    "personal_agent": [
+     0.75,
+     {
+      "t": "Your first dot is included on Pro: one always-on agent on GPT-6 Astra that can start Codex tasks. Not in the EEA, UK or Switzerland.",
+      "s": [
+       "dots",
+       "report_dots"
+      ],
+      "u": "Dots limits after the first month are not published"
+     }
+    ]
+   }
+  },
+  "api_payg": {
+   "family": "api",
+   "name": "Pay-as-you-go API keys",
+   "price": null,
+   "f": {
+    "headroom": [
+     1,
+     {
+      "t": "No plan cap: you pay per token (GPT-6 Luna $0.10 / $0.50, GPT-6.1 Sol $2 / $10, Sonnet 5.5 $2 / $10, Opus 5.5 $4 / $20 per 1M in / out).",
+      "s": [
+       "openai_models",
+       "anthropic_models"
+      ]
+     }
+    ]
+   }
+  }
+ },
+ "features": {
+  "eco_openai": {
+   "label": "Part of your ChatGPT plan",
+   "combine": "share",
+   "v": {
+    "chatgpt": [
+     1,
+     {
+      "t": "Codex is included in ChatGPT Plus and up.",
+      "s": [
+       "codex_pricing"
+      ]
+     }
+    ],
+    "claude": [
+     0,
+     {
+      "t": "A separate Anthropic plan.",
+      "s": [
+       "claude_pricing"
+      ]
+     }
+    ],
+    "cursor": [
+     0,
+     {
+      "t": "Cursor's price list on Oct 5 showed GPT-5.6 models but no GPT-6 or GPT-6.1 models.",
+      "s": [
+       "cursor_models"
+      ]
+     }
+    ],
+    "api": [
+     0.25,
+     {
+      "t": "Same Codex CLI, billed per token on an OpenAI key instead of your plan.",
+      "s": [
+       "openai_models"
+      ]
+     }
+    ]
+   }
+  },
+  "eco_claude": {
+   "label": "Part of your Claude plan",
+   "combine": "share",
+   "v": {
+    "claude": [
+     1,
+     {
+      "t": "Claude Code is included in Claude Pro and Max.",
+      "s": [
+       "claude_pricing"
+      ]
+     }
+    ],
+    "chatgpt": [
+     0,
+     {
+      "t": "A separate OpenAI plan.",
+      "s": [
+       "codex_pricing"
+      ]
+     }
+    ],
+    "cursor": [
+     0,
+     {
+      "t": "Offers Claude models at API prices, but it is not your Claude plan.",
+      "s": [
+       "cursor_models"
+      ]
+     }
+    ],
+    "api": [
+     0.25,
+     {
+      "t": "Same Claude Code, billed per token on an Anthropic key instead of your plan.",
+      "s": [
+       "claude_model_config"
+      ]
+     }
+    ]
+   }
+  },
+  "eco_cursor": {
+   "label": "Part of your Cursor plan",
+   "combine": "share",
+   "v": {
+    "cursor": [
+     1,
+     {
+      "t": "Your Cursor plan, with Grok Bot included.",
+      "s": [
+       "grokbot"
+      ]
+     }
+    ],
+    "claude": [
+     0,
+     {
+      "t": "No native Grok Bot link; a Bot can run the claude CLI.",
+      "s": [
+       "report_main"
+      ]
+     }
+    ],
+    "chatgpt": [
+     0,
+     {
+      "t": "No native Grok Bot link; a Bot can run the codex CLI.",
+      "s": [
+       "report_main"
+      ]
+     }
+    ],
+    "api": [
+     0,
+     {
+      "t": "Not part of Cursor.",
+      "s": [
+       "report_main"
+      ]
+     }
+    ]
+   }
+  },
+  "infra": {
+   "label": "Infra, DevOps, certs and DNS",
+   "combine": "max",
+   "v": {
+    "claude": [
+     1,
+     {
+      "t": "Claude Code with Sonnet 5.5 at max effort: Terminal-Bench 4.0 63.6%, the top independent score. Claude was best in 13 of 16 rows of our task matrices, including AWS, certs and DNS.",
+      "s": [
+       "aa_tb4",
+       "report_main"
+      ]
+     }
+    ],
+    "chatgpt": [
+     0.75,
+     {
+      "t": "GPT-6.1 Sol: Terminal-Bench 4.0 56%; GPT-6 Astra 59%.",
+      "s": [
+       "aa_tb4",
+       "notes_oct6"
+      ],
+      "u": "Sol and Astra Terminal-Bench numbers came from a search snippet and a third-party summary"
+     }
+    ],
+    "cursor": [
+     0.5,
+     {
+      "t": "Grok 4.7, the value model in Cursor, is weak on infra: Terminal-Bench 4.0 33 to 38%. Claude models cost API prices from the $20 to $400 pool.",
+      "s": [
+       "aa_grok",
+       "cursor_models"
+      ]
+     }
+    ],
+    "api": [
+     1,
+     {
+      "t": "Claude Code on an Anthropic key runs the same Sonnet 5.5 ($2 / $10 per 1M).",
+      "s": [
+       "anthropic_models"
+      ]
+     }
+    ]
+   }
+  },
+  "product": {
+   "label": "Product and app builds",
+   "combine": "max",
+   "v": {
+    "claude": [
+     1,
+     {
+      "t": "AA Coding Agent Index: Claude Code with Sonnet 5.5 68.4 and Opus 5.5 66.0, the top two.",
+      "s": [
+       "aa_index"
+      ],
+      "u": "Read from the BenchLM mirror, not AA's own page"
+     }
+    ],
+    "chatgpt": [
+     0.75,
+     {
+      "t": "Codex with GPT-6.1 Sol: about 63 on the same index (xhigh).",
+      "s": [
+       "aa_index"
+      ],
+      "u": "Read from the BenchLM mirror, not AA's own page"
+     }
+    ],
+    "cursor": [
+     0.75,
+     {
+      "t": "Best place to steer edits by hand, with Opus 5.5 and Sonnet 5.5 at API prices. Grok 4.7 scores 56.3 on the index.",
+      "s": [
+       "report_main",
+       "aa_index"
+      ]
+     }
+    ],
+    "api": [
+     1,
+     {
+      "t": "The same Claude Code and Codex agents, billed per token.",
+      "s": [
+       "claude_model_config",
+       "openai_models"
+      ]
+     }
+    ]
+   }
+  },
+  "bulk": {
+   "label": "Bulk refactors and editor work",
+   "combine": "max",
+   "v": {
+    "cursor": [
+     1,
+     {
+      "t": "Grok 4.7 in Cursor is the best value for bulk editor work: $2 / $6 per 1M from the included Cursor Models pool. Fast mode is the default and costs 2x.",
+      "s": [
+       "cursor_grok47",
+       "cursor_models"
+      ]
+     }
+    ],
+    "chatgpt": [
+     0.75,
+     {
+      "t": "GPT-6 Luna at $0.10 / $0.50 per 1M is great for cheap, checkable chores.",
+      "s": [
+       "openai_models",
+       "notes_oct6"
+      ]
+     }
+    ],
+    "claude": [
+     0.5,
+     {
+      "t": "Strong, but Opus drains quota fastest.",
+      "s": [
+       "claude_model_config"
+      ]
+     }
+    ],
+    "api": [
+     0.75,
+     {
+      "t": "Luna on a key makes routine edits almost free.",
+      "s": [
+       "openai_models"
+      ]
+     }
+    ]
+   }
+  },
+  "scripts": {
+   "label": "Scripts and automation",
+   "combine": "max",
+   "v": {
+    "chatgpt": [
+     1,
+     {
+      "t": "The most usage for the money, with safe defaults, and Luna for cheap checkable chores.",
+      "s": [
+       "codex_pricing",
+       "report_main"
+      ]
+     }
+    ],
+    "api": [
+     1,
+     {
+      "t": "Pay per token. OpenAI recommends API keys for CI and shared automation.",
+      "s": [
+       "sign_in_chatgpt"
+      ]
+     }
+    ],
+    "claude": [
+     0.75,
+     {
+      "t": "claude -p and the Agent SDK script well; plan limits are shared with chat.",
+      "s": [
+       "claude_code",
+       "claude_limits"
+      ]
+     }
+    ],
+    "cursor": [
+     0.75,
+     {
+      "t": "agent -p print mode, the Cloud Agents API and Grok Bot routines.",
+      "s": [
+       "cursor_cli",
+       "grokbot_routines"
+      ]
+     }
+    ]
+   }
+  },
+  "writing": {
+   "label": "Writing alongside code",
+   "combine": "max",
+   "v": {
+    "claude": [
+     1,
+     {
+      "t": "Opus 5.5 leads the closest proxy (GDPval-AA 1846). Client writing was a Claude row in our matrices.",
+      "s": [
+       "opus55",
+       "report_main"
+      ],
+      "u": "No real writing benchmark exists; GDPval-AA is a proxy"
+     }
+    ],
+    "api": [
+     0.75,
+     {
+      "t": "Opus 5.5 by the token at $4 / $20 per 1M.",
+      "s": [
+       "anthropic_models"
+      ]
+     }
+    ],
+    "chatgpt": [
+     0.5,
+     {
+      "t": "GPT-6 Astra scores 1542 on the same proxy.",
+      "s": [
+       "opus55"
+      ]
+     }
+    ],
+    "cursor": [
+     0.5,
+     {
+      "t": "Grok 4.7 scores 1695 on GDPval-AA; Claude models cost API prices from the pool.",
+      "s": [
+       "aa_grok"
+      ]
+     }
+    ]
+   }
+  },
+  "ch_ide": {
+   "label": "Works in your IDE",
+   "combine": "max",
+   "v": {
+    "cursor": [
+     1,
+     {
+      "t": "A VS Code based AI editor; the best hands-on editing and model choice.",
+      "s": [
+       "report_main"
+      ]
+     }
+    ],
+    "claude": [
+     0.75,
+     {
+      "t": "VS Code, Cursor and JetBrains extensions.",
+      "s": [
+       "claude_code"
+      ]
+     }
+    ],
+    "chatgpt": [
+     0.75,
+     {
+      "t": "Codex IDE extension.",
+      "s": [
+       "codex_docs"
+      ]
+     }
+    ],
+    "api": [
+     0.5,
+     {
+      "t": "Claude Code and Codex also run on API keys; you set up keys and billing.",
+      "s": [
+       "claude_model_config",
+       "openai_models"
+      ]
+     }
+    ]
+   }
+  },
+  "ch_terminal": {
+   "label": "Works in the terminal",
+   "combine": "max",
+   "v": {
+    "claude": [
+     1,
+     {
+      "t": "The most configurable agent harness and the strongest pick for hard reasoning in the terminal.",
+      "s": [
+       "report_main"
+      ]
+     }
+    ],
+    "chatgpt": [
+     1,
+     {
+      "t": "Codex CLI and codex exec.",
+      "s": [
+       "codex_docs"
+      ]
+     }
+    ],
+    "cursor": [
+     0.75,
+     {
+      "t": "Cursor has a terminal CLI (agent).",
+      "s": [
+       "cursor_cli"
+      ]
+     }
+    ],
+    "api": [
+     1,
+     {
+      "t": "Runs the same CLIs on API keys.",
+      "s": [
+       "claude_model_config"
+      ]
+     }
+    ]
+   }
+  },
+  "ch_cloud": {
+   "label": "Cloud and background agents",
+   "combine": "max",
+   "v": {
+    "cursor": [
+     1,
+     {
+      "t": "Cloud agents in isolated VMs; Grok Bot can launch them.",
+      "s": [
+       "cursor_cloud",
+       "grokbot_teams"
+      ]
+     }
+    ],
+    "chatgpt": [
+     1,
+     {
+      "t": "Cloud tasks and environments, scheduled tasks and dots.",
+      "s": [
+       "codex_docs",
+       "report_main"
+      ]
+     }
+    ],
+    "claude": [
+     0.75,
+     {
+      "t": "Web sessions, Routines, background agents and Remote Control.",
+      "s": [
+       "claude_code"
+      ]
+     }
+    ],
+    "api": [
+     0.5,
+     {
+      "t": "Hosted options such as Claude Managed Agents bill on the API; otherwise you run the CLI yourself.",
+      "s": [
+       "report_main"
+      ]
+     }
+    ]
+   }
+  },
+  "ch_chat": {
+   "label": "Slack, GitHub and phone",
+   "combine": "max",
+   "v": {
+    "cursor": [
+     1,
+     {
+      "t": "@cursor in Slack, GitHub, Bitbucket and Linear; iOS app; Grok Bot in Slack.",
+      "s": [
+       "cursor_cloud",
+       "grokbot"
+      ]
+     }
+    ],
+    "chatgpt": [
+     1,
+     {
+      "t": "@codex on GitHub issues and PRs, Slack, Linear and iOS. These need a ChatGPT plan, not an API key.",
+      "s": [
+       "codex_docs"
+      ]
+     }
+    ],
+    "claude": [
+     0.5,
+     {
+      "t": "@Claude in Slack only on Team and Enterprise (Claude Tag); GitHub Actions; mobile.",
+      "s": [
+       "claude_tag",
+       "claude_code"
+      ]
+     }
+    ],
+    "api": [
+     0.25,
+     {
+      "t": "Codex's GitHub, Slack and Linear hooks need a ChatGPT plan, not an API key.",
+      "s": [
+       "codex_docs"
+      ]
+     }
+    ]
+   }
+  },
+  "top_model": {
+   "label": "Strongest model on hard work",
+   "combine": "max",
+   "v": {
+    "claude": [
+     1,
+     {
+      "t": "Top two on the AA Coding Agent Index (68.4 and 66.0) and top independent Terminal-Bench 4.0 (63.6%).",
+      "s": [
+       "aa_index",
+       "aa_tb4"
+      ],
+      "u": "Index values read from the BenchLM mirror"
+     }
+    ],
+    "api": [
+     1,
+     {
+      "t": "The same top models, by the token.",
+      "s": [
+       "anthropic_models"
+      ]
+     }
+    ],
+    "chatgpt": [
+     0.75,
+     {
+      "t": "GPT-6.1 Sol is about 63 on the index, about 5.5 points behind Claude.",
+      "s": [
+       "aa_index",
+       "report_main"
+      ],
+      "u": "Index values read from the BenchLM mirror"
+     }
+    ],
+    "cursor": [
+     0.5,
+     {
+      "t": "The included Grok 4.7 scores 56.3; Claude models cost API rates from the pool.",
+      "s": [
+       "aa_index",
+       "cursor_models"
+      ]
+     }
+    ]
+   }
+  },
+  "value": {
+   "label": "Most agent hours per dollar",
+   "combine": "max",
+   "v": {
+    "chatgpt": [
+     1,
+     {
+      "t": "Codex gives the most usage per dollar.",
+      "s": [
+       "report_main",
+       "codex_pricing"
+      ]
+     }
+    ],
+    "cursor": [
+     0.5,
+     {
+      "t": "Pools track API prices; Grok 4.7 from the included pool is the value play.",
+      "s": [
+       "cursor_models"
+      ]
+     }
+    ],
+    "claude": [
+     0.5,
+     {
+      "t": "Plans are a big discount on API rates, but limits are not published in dollars.",
+      "s": [
+       "claude_limits"
+      ]
+     }
+    ],
+    "api": [
+     0.5,
+     {
+      "t": "Luna is nearly free; Opus at API rates adds up fast.",
+      "s": [
+       "openai_models",
+       "anthropic_models"
+      ]
+     }
+    ]
+   }
+  },
+  "background": {
+   "label": "Scheduled and background jobs",
+   "combine": "max",
+   "v": {
+    "cursor": [
+     1,
+     {
+      "t": "Grok Bot routines on cron schedules, plus cloud agents.",
+      "s": [
+       "grokbot_routines",
+       "cursor_cloud"
+      ]
+     }
+    ],
+    "chatgpt": [
+     1,
+     {
+      "t": "Scheduled tasks and dots.",
+      "s": [
+       "codex_docs"
+      ]
+     }
+    ],
+    "claude": [
+     0.75,
+     {
+      "t": "Routines and background agents.",
+      "s": [
+       "claude_code"
+      ]
+     }
+    ],
+    "api": [
+     0.5,
+     {
+      "t": "You schedule it yourself, for example cron plus claude -p or codex exec.",
+      "s": [
+       "report_dots"
+      ]
+     }
+    ]
+   }
+  },
+  "long_runs": {
+   "label": "Long multi-day agent runs",
+   "combine": "max",
+   "v": {
+    "claude": [
+     1,
+     {
+      "t": "Opus 5.5 is our pick for multi-day migrations (AA index 66.0 vs Sol 62.9). No METR time horizon exists for any of these models.",
+      "s": [
+       "report_main",
+       "aa_index"
+      ]
+     }
+    ],
+    "chatgpt": [
+     0.75,
+     {
+      "t": "GPT-6.1 Sol is the runner-up; multi-day Astra runs were where Codex money went.",
+      "s": [
+       "report_main"
+      ]
+     }
+    ],
+    "api": [
+     0.75,
+     {
+      "t": "Opus 5.5 by API works, at $4 / $20 per 1M.",
+      "s": [
+       "anthropic_models"
+      ]
+     }
+    ],
+    "cursor": [
+     0.5,
+     {
+      "t": "Grok 4.7 has the lowest long-context score in our set (AA-LCR 76.7%) and burns the most tokens per task.",
+      "s": [
+       "aievals_grok",
+       "aa_grok"
+      ],
+      "u": "AA-LCR for Grok 4.7 came from a mirror"
+     }
+    ]
+   }
+  },
+  "bot_driven": {
+   "label": "Bots and scripts driving it",
+   "combine": "max",
+   "v": {
+    "chatgpt": [
+     1,
+     {
+      "t": "Officially supported: Sign in with ChatGPT lets local tools use your plan, with per-app weekly caps.",
+      "s": [
+       "sign_in_chatgpt"
+      ]
+     }
+    ],
+    "api": [
+     1,
+     {
+      "t": "API keys are the safe path for heavy unattended runs.",
+      "s": [
+       "report_main"
+      ]
+     }
+    ],
+    "cursor": [
+     0.75,
+     {
+      "t": "Grok Bot uses your Cursor account directly; other tools go through the Cloud Agents API at API rates.",
+      "s": [
+       "grokbot",
+       "cursor_cloud"
+      ]
+     }
+    ],
+    "claude": [
+     0.25,
+     {
+      "t": "Allowed only for the unmodified CLI on your own login; limits \"assume ordinary, individual usage\".",
+      "s": [
+       "claude_legal"
+      ],
+      "u": "Anthropic's docs conflict on Agent SDK use with a plan"
+     }
+    ]
+   }
+  },
+  "personal_agent": {
+   "label": "Personal agent included",
+   "combine": "max",
+   "v": {
+    "cursor": [
+     1,
+     {
+      "t": "Every paid Cursor plan includes Grok Bot: named bots, routines and a shared cloud computer.",
+      "s": [
+       "grokbot",
+       "grokbot_plans"
+      ],
+      "u": "Weekly Grok Bot usage per tier is not published"
+     }
+    ],
+    "claude": [
+     0,
+     {
+      "t": "Our research found no personal agent included with Claude Pro or Max.",
+      "s": [
+       "report_main"
+      ]
+     }
+    ],
+    "chatgpt": [
+     0,
+     {
+      "t": "Dots need ChatGPT Pro.",
+      "s": [
+       "dots"
+      ]
+     }
+    ],
+    "api": [
+     0,
+     {
+      "t": "An API key is model access only.",
+      "s": [
+       "report_main"
+      ]
+     }
+    ]
+   }
+  },
+  "pr_review": {
+   "label": "Automatic PR review",
+   "combine": "max",
+   "v": {
+    "chatgpt": [
+     1,
+     {
+      "t": "Automatic PR review and @codex on GitHub.",
+      "s": [
+       "codex_docs"
+      ]
+     }
+    ],
+    "cursor": [
+     0.75,
+     {
+      "t": "Bugbot and @cursor on GitHub.",
+      "s": [
+       "report_main"
+      ]
+     }
+    ],
+    "claude": [
+     0.75,
+     {
+      "t": "GitHub Code Review and GitHub Actions.",
+      "s": [
+       "claude_code"
+      ]
+     }
+    ],
+    "api": [
+     0.5,
+     {
+      "t": "GitHub Actions can run headless Claude Code; Codex auto review needs a ChatGPT plan.",
+      "s": [
+       "report_main"
+      ]
+     }
+    ]
+   }
+  },
+  "model_choice": {
+   "label": "Pick and switch models",
+   "combine": "max",
+   "v": {
+    "cursor": [
+     1,
+     {
+      "t": "Models from many vendors: Claude, GPT, Gemini, Grok and Composer.",
+      "s": [
+       "cursor_models"
+      ]
+     }
+    ],
+    "api": [
+     0.75,
+     {
+      "t": "Any Claude or OpenAI model, by the token.",
+      "s": [
+       "anthropic_models",
+       "openai_models"
+      ]
+     }
+    ],
+    "claude": [
+     0.25,
+     {
+      "t": "Claude models only (Opus, Sonnet, Haiku, Fable).",
+      "s": [
+       "claude_model_config"
+      ]
+     }
+    ],
+    "chatgpt": [
+     0.25,
+     {
+      "t": "OpenAI models only (Sol, Astra, Luna, GPT-5.6).",
+      "s": [
+       "codex_docs"
+      ]
+     }
+    ]
+   }
+  },
+  "turnkey": {
+   "label": "Works out of the box",
+   "combine": "turnkey",
+   "v": {
+    "cursor": [
+     1,
+     {
+      "t": "Install, sign in and start; Grok Bot comes with the plan.",
+      "s": [
+       "grokbot"
+      ]
+     }
+    ],
+    "claude": [
+     1,
+     {
+      "t": "Sign in with your Claude plan.",
+      "s": [
+       "claude_code"
+      ]
+     }
+    ],
+    "chatgpt": [
+     1,
+     {
+      "t": "Sign in with ChatGPT.",
+      "s": [
+       "codex_docs"
+      ]
+     }
+    ],
+    "api": [
+     0.25,
+     {
+      "t": "You set up keys, budgets and the CLI yourself.",
+      "s": [
+       "report_main"
+      ]
+     }
+    ]
+   }
+  },
+  "guardrails": {
+   "label": "Spend caps and approvals",
+   "combine": "max",
+   "v": {
+    "chatgpt": [
+     1,
+     {
+      "t": "Safe defaults, and per-app weekly caps when tools drive your plan.",
+      "s": [
+       "report_main",
+       "sign_in_chatgpt"
+      ]
+     }
+    ],
+    "cursor": [
+     0.75,
+     {
+      "t": "Set a cloud-agent spend limit; past the included amount you pay on demand at API rates.",
+      "s": [
+       "cursor_pricing"
+      ]
+     }
+    ],
+    "claude": [
+     0.75,
+     {
+      "t": "Flat plan price and hooks for approvals; usage credits bill at API rates.",
+      "s": [
+       "claude_limits",
+       "claude_code"
+      ]
+     }
+    ],
+    "api": [
+     0.75,
+     {
+      "t": "Put a hard monthly cap on each key.",
+      "s": [
+       "report_main"
+      ]
+     }
+    ]
+   }
+  },
+  "configurable": {
+   "label": "Every knob exposed",
+   "combine": "max",
+   "v": {
+    "claude": [
+     1,
+     {
+      "t": "Hooks, skills, subagents and MCP.",
+      "s": [
+       "claude_code"
+      ]
+     }
+    ],
+    "api": [
+     1,
+     {
+      "t": "The same Claude Code harness on a key.",
+      "s": [
+       "claude_model_config"
+      ]
+     }
+    ],
+    "cursor": [
+     0.75,
+     {
+      "t": "MCP in the editor, CLI and cloud agents; Cursor SDK.",
+      "s": [
+       "report_main"
+      ]
+     }
+    ],
+    "chatgpt": [
+     0.75,
+     {
+      "t": "MCP client and the Codex SDK.",
+      "s": [
+       "codex_docs"
+      ]
+     }
+    ]
+   }
+  },
+  "hosted": {
+   "label": "Someone else runs the servers",
+   "combine": "max",
+   "v": {
+    "cursor": [
+     1,
+     {
+      "t": "Cloud agent VMs with real dev environments.",
+      "s": [
+       "cursor_cloud"
+      ]
+     }
+    ],
+    "chatgpt": [
+     1,
+     {
+      "t": "Cloud tasks and environments.",
+      "s": [
+       "codex_docs"
+      ]
+     }
+    ],
+    "claude": [
+     0.75,
+     {
+      "t": "Web sessions and Routines.",
+      "s": [
+       "claude_code"
+      ]
+     }
+    ],
+    "api": [
+     0.25,
+     {
+      "t": "You run the agent on your own machine or server.",
+      "s": [
+       "report_main"
+      ]
+     }
+    ]
+   }
+  },
+  "headroom": {
+   "label": "Room for heavy use",
+   "combine": "sum",
+   "v": {}
+  }
+ },
+ "cost_tiers": [
+  20,
+  60,
+  100,
+  200
+ ],
+ "outcomes": [
+  {
+   "id": "cursor_pro",
+   "parts": [
+    "cursor_pro"
+   ],
+   "blurb": "The editor plan, with Grok Bot and cloud agents.",
+   "routing": "Use Grok 4.7 at standard speed for bulk edits (fast mode is the default and costs 2x). Switch to Sonnet 5.5 or Opus 5.5 from the Other Models pool for hard infra, at API prices. Let Grok Bot run routines and launch cloud agents."
+  },
+  {
+   "id": "cursor_proplus",
+   "parts": [
+    "cursor_proplus"
+   ],
+   "blurb": "More Cursor and Grok Bot usage in one bill.",
+   "routing": "Same as Cursor Pro, with a bigger pool: Grok 4.7 at standard speed for bulk work, Claude models for hard infra, Grok Bot as the hub."
+  },
+  {
+   "id": "cursor_ultra",
+   "parts": [
+    "cursor_ultra"
+   ],
+   "blurb": "One bill, the highest Grok Bot allowance and $400 of third-party models.",
+   "routing": "Lean on Cursor's own models (Composer 2.5, Grok 4.7) for routine work so the $400 third-party pool lasts; spend it on Sonnet 5.5 and Opus 5.5 for hard work. No Claude Code or Codex plan is included."
+  },
+  {
+   "id": "claude_pro",
+   "parts": [
+    "claude_pro"
+   ],
+   "blurb": "Claude Code with the strongest coding scores, at the entry price.",
+   "routing": "Run Sonnet 5.5 at high or max effort by default (index 68.4 at max vs 45.9 at medium). Use Opus 5.5 when stuck; it drains quota fastest. Use /clear between tasks."
+  },
+  {
+   "id": "claude_max5",
+   "parts": [
+    "claude_max5"
+   ],
+   "blurb": "Our report's pick if you can pay for only one agent plan.",
+   "routing": "Sonnet 5.5 by default, Opus 5.5 for multi-day work, long refactors and client writing. Keep bot-driven runs on an API key."
+  },
+  {
+   "id": "claude_max20",
+   "parts": [
+    "claude_max20"
+   ],
+   "blurb": "The safer Claude tier if your use stays heavy.",
+   "routing": "Sonnet 5.5 by default, Opus 5.5 orchestrating long work. Keep bot-driven runs on an API key with a budget."
+  },
+  {
+   "id": "chatgpt_plus",
+   "parts": [
+    "chatgpt_plus"
+   ],
+   "blurb": "Codex at the entry price, the most usage per dollar.",
+   "routing": "GPT-6.1 Sol by default ($2 / $10, index about 63). GPT-6 Luna for cheap checkable chores ($0.10 / $0.50). Skip GPT-5.6 Terra for new work; there is no GPT-6.1 Terra."
+  },
+  {
+   "id": "chatgpt_pro",
+   "parts": [
+    "chatgpt_pro"
+   ],
+   "blurb": "Codex without a five-hour cap, plus your first dot.",
+   "routing": "GPT-6.1 Sol by default, Luna for chores, Astra ($10 / $50) only when you need its long context or computer use; it costs 5x Sol for about the same coding score."
+  },
+  {
+   "id": "api_payg",
+   "parts": [
+    "api_payg"
+   ],
+   "blurb": "No plan: pay per token on Anthropic and OpenAI keys.",
+   "routing": "Luna for bulk and bot jobs, Sonnet 5.5 for hard turns, Opus 5.5 sparingly. Put a hard monthly cap on each key."
+  },
+  {
+   "id": "cursor_claude",
+   "parts": [
+    "cursor_pro",
+    "claude_pro"
+   ],
+   "blurb": "Grok Bot and the editor, plus Claude Code for hard work.",
+   "routing": "Grok 4.7 at standard speed in Cursor for bulk edits, Claude Code with Sonnet 5.5 (Opus 5.5 when stuck) for hard infra. Grok Bot is the hub."
+  },
+  {
+   "id": "cursor_chatgpt",
+   "parts": [
+    "cursor_pro",
+    "chatgpt_plus"
+   ],
+   "blurb": "Grok Bot and the editor, plus Codex volume.",
+   "routing": "Codex on GPT-6.1 Sol by default, Luna for chores, Grok 4.7 in Cursor for bulk edits. Borrow Claude models from the Cursor pool for hard infra."
+  },
+  {
+   "id": "stack60",
+   "parts": [
+    "cursor_pro",
+    "claude_pro",
+    "chatgpt_plus"
+   ],
+   "blurb": "A three-plan stack: Grok Bot hub, Codex workhorse, Claude specialist.",
+   "routing": "Codex on GPT-6.1 Sol by default, GPT-6 Luna for chores, Claude Code by hand (Sonnet 5.5, Opus 5.5 when stuck) for hard infra, Grok 4.7 at standard speed in Cursor for bulk edits. Grok Bot is the hub."
+  },
+  {
+   "id": "max5_cursor",
+   "parts": [
+    "claude_max5",
+    "cursor_pro"
+   ],
+   "blurb": "Our report's main pick: Claude Max 5x, and keep Cursor Pro for Grok Bot.",
+   "routing": "Sonnet 5.5 by default in Claude Code, Opus 5.5 for long and open-ended work, Grok 4.7 at standard speed in Cursor for bulk. Point bot jobs at a capped Luna API key."
+  },
+  {
+   "id": "chatgptpro_cursor",
+   "parts": [
+    "chatgpt_pro",
+    "cursor_pro"
+   ],
+   "blurb": "Codex at Pro limits and dots, plus Grok Bot.",
+   "routing": "Codex on GPT-6.1 Sol by default, Luna for chores, Grok Bot as the team hub and a dot as a phone front door. Claude models from the Cursor pool for hard infra."
+  },
+  {
+   "id": "pro_stack",
+   "parts": [
+    "chatgpt_pro",
+    "cursor_pro",
+    "claude_pro"
+   ],
+   "blurb": "The volume-first stack from our report: Codex at Pro limits, Cursor hub, Claude specialist.",
+   "routing": "Codex on Sol as the default runner with automatic PR review, Luna for routine edits, Claude Code by hand for hard problems, Grok Bot for routines and cloud agents."
+  }
+ ],
+ "questions": [
+  {
+   "id": "eco",
+   "kicker": "Home base",
+   "q": "Where does your AI coding already live?",
+   "sub": "If you already pay for one, that usually decides a lot.",
+   "options": [
+    {
+     "v": "chatgpt",
+     "t": "ChatGPT",
+     "d": "Plus or Pro, Codex",
+     "feature": "eco_openai",
+     "wants": [
+      {
+       "f": "eco_openai",
+       "w": "$lock"
+      }
+     ]
+    },
+    {
+     "v": "claude",
+     "t": "Claude",
+     "d": "Pro or Max, Claude Code",
+     "feature": "eco_claude",
+     "wants": [
+      {
+       "f": "eco_claude",
+       "w": "$lock"
+      }
+     ]
+    },
+    {
+     "v": "cursor",
+     "t": "Cursor",
+     "d": "Including Grok Bot",
+     "feature": "eco_cursor",
+     "wants": [
+      {
+       "f": "eco_cursor",
+       "w": "$lock"
+      }
+     ]
+    },
+    {
+     "v": "none",
+     "t": "No home base",
+     "d": "I use a mix or nothing yet"
+    }
+   ],
+   "follow": {
+    "id": "lock",
+    "unless": {
+     "eco": [
+      "none"
+     ]
+    },
+    "q": "How locked in are you?",
+    "options": [
+     {
+      "v": "all",
+      "t": "All in",
+      "d": "I pay for it and my setup lives there",
+      "value": 7
+     },
+     {
+      "v": "some",
+      "t": "Open to switching",
+      "d": "I'd move for something better",
+      "value": 2.5
+     }
+    ]
+   }
+  },
+  {
+   "id": "work",
+   "kicker": "The job",
+   "q": "What will you mostly use it for?",
+   "sub": "Pick up to two. One pick counts 4 points; two picks count 2 each.",
+   "multi": 2,
+   "split": true,
+   "options": [
+    {
+     "v": "infra",
+     "t": "Infra and DevOps",
+     "d": "Cloud, IaC, certs, DNS",
+     "wants": [
+      {
+       "f": "infra",
+       "w": 4
+      }
+     ]
+    },
+    {
+     "v": "product",
+     "t": "Product and app builds",
+     "d": "Features, client apps",
+     "wants": [
+      {
+       "f": "product",
+       "w": 4
+      }
+     ]
+    },
+    {
+     "v": "bulk",
+     "t": "Bulk refactors and editor work",
+     "wants": [
+      {
+       "f": "bulk",
+       "w": 4
+      }
+     ]
+    },
+    {
+     "v": "scripts",
+     "t": "Scripts and automation",
+     "wants": [
+      {
+       "f": "scripts",
+       "w": 4
+      }
+     ]
+    },
+    {
+     "v": "writing",
+     "t": "Writing alongside code",
+     "d": "Docs, proposals, client email",
+     "wants": [
+      {
+       "f": "writing",
+       "w": 4
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "where",
+   "kicker": "Where you work",
+   "q": "Where do you like to work with it?",
+   "sub": "Pick up to two.",
+   "multi": 2,
+   "options": [
+    {
+     "v": "ide",
+     "t": "In my IDE",
+     "wants": [
+      {
+       "f": "ch_ide",
+       "w": 2
+      }
+     ]
+    },
+    {
+     "v": "terminal",
+     "t": "In the terminal",
+     "wants": [
+      {
+       "f": "ch_terminal",
+       "w": 2
+      }
+     ]
+    },
+    {
+     "v": "cloud",
+     "t": "Cloud and background agents",
+     "wants": [
+      {
+       "f": "ch_cloud",
+       "w": 2
+      }
+     ]
+    },
+    {
+     "v": "chat",
+     "t": "From Slack, GitHub or my phone",
+     "wants": [
+      {
+       "f": "ch_chat",
+       "w": 2
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "stakes",
+   "kicker": "Stakes",
+   "q": "How hard and high-stakes is the work?",
+   "options": [
+    {
+     "v": "routine",
+     "t": "Mostly routine",
+     "d": "Cheap models are fine if I can check the result",
+     "wants": [
+      {
+       "f": "value",
+       "w": 1.5
+      }
+     ]
+    },
+    {
+     "v": "mixed",
+     "t": "A mix",
+     "d": "Some hard problems each week",
+     "wants": [
+      {
+       "f": "top_model",
+       "w": 1.5
+      }
+     ]
+    },
+    {
+     "v": "high",
+     "t": "Hard and high-stakes",
+     "d": "Production infra, client work, things that break",
+     "wants": [
+      {
+       "f": "top_model",
+       "w": 3
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "autonomy",
+   "kicker": "Initiative",
+   "q": "How much should it run without you?",
+   "options": [
+    {
+     "v": "ask",
+     "t": "Only when I ask"
+    },
+    {
+     "v": "routines",
+     "t": "Background jobs I set up",
+     "d": "Scheduled or triggered runs",
+     "wants": [
+      {
+       "f": "background",
+       "w": 1.5
+      }
+     ]
+    },
+    {
+     "v": "long",
+     "t": "Long multi-day agent runs",
+     "d": "Migrations, big refactors",
+     "wants": [
+      {
+       "f": "long_runs",
+       "w": 3
+      }
+     ]
+    },
+    {
+     "v": "bots",
+     "t": "Bots and scripts drive it all day",
+     "d": "Headless runs from other tools",
+     "wants": [
+      {
+       "f": "bot_driven",
+       "w": 3
+      }
+     ],
+     "gates": [
+      {
+       "kind": "warn",
+       "parts": [
+        "claude_pro",
+        "claude_max5",
+        "claude_max20"
+       ],
+       "why": "Bots driving a Claude subscription is a grey area; use an API key for heavy unattended runs",
+       "ev": {
+        "t": "Allowed only for the unmodified CLI on your own login; limits \"assume ordinary, individual usage\".",
+        "s": [
+         "claude_legal",
+         "report_main"
+        ]
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "musthave",
+   "kicker": "Must-have",
+   "q": "Which of these matters most to you?",
+   "sub": "All of these tools edit repos, run commands and open PRs. These are the things that actually differ.",
+   "options": [
+    {
+     "v": "agent",
+     "t": "A personal agent included",
+     "d": "Bots that run routines and hand off coding",
+     "wants": [
+      {
+       "f": "personal_agent",
+       "w": 3
+      }
+     ]
+    },
+    {
+     "v": "volume",
+     "t": "The most agent hours per dollar",
+     "wants": [
+      {
+       "f": "value",
+       "w": 3
+      }
+     ]
+    },
+    {
+     "v": "review",
+     "t": "Automatic PR review",
+     "wants": [
+      {
+       "f": "pr_review",
+       "w": 3
+      }
+     ]
+    },
+    {
+     "v": "none",
+     "t": "None of these",
+     "d": "The basics are enough"
+    }
+   ]
+  },
+  {
+   "id": "model",
+   "kicker": "The model",
+   "q": "How much do you care which model does the thinking?",
+   "options": [
+    {
+     "v": "any",
+     "t": "Not at all",
+     "d": "Just make it good",
+     "wants": [
+      {
+       "f": "turnkey",
+       "w": 1
+      }
+     ]
+    },
+    {
+     "v": "mine",
+     "t": "I want the one I already use",
+     "wants": [
+      {
+       "f": "$eco_feature",
+       "w": 3,
+       "fallback": {
+        "f": "turnkey",
+        "w": 1
+       }
+      }
+     ]
+    },
+    {
+     "v": "choose",
+     "t": "I want to pick and switch models",
+     "wants": [
+      {
+       "f": "model_choice",
+       "w": 3
+      }
+     ]
+    },
+    {
+     "v": "best",
+     "t": "I want the strongest coding model, whoever makes it",
+     "wants": [
+      {
+       "f": "top_model",
+       "w": 3
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "control",
+   "kicker": "Control",
+   "q": "How hands-on do you want to be?",
+   "options": [
+    {
+     "v": "easy",
+     "t": "It should just work",
+     "d": "No setup",
+     "wants": [
+      {
+       "f": "turnkey",
+       "w": 4
+      }
+     ],
+     "gates": [
+      {
+       "kind": "limit",
+       "ids": [
+        "api_payg"
+       ],
+       "factor": "$setup_penalty",
+       "unless": {
+        "setup": [
+         "yes"
+        ]
+       },
+       "why": "You'll set up keys and billing yourself",
+       "ev": {
+        "t": "You set up keys, budgets and the CLI yourself.",
+        "s": [
+         "report_main"
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "v": "rules",
+     "t": "Some guardrails",
+     "d": "Spend caps, approvals for risky steps",
+     "wants": [
+      {
+       "f": "turnkey",
+       "w": 2
+      },
+      {
+       "f": "guardrails",
+       "w": 2
+      }
+     ]
+    },
+    {
+     "v": "knobs",
+     "t": "Every knob",
+     "d": "Hooks, skills, subagents, MCP, but hosted for me",
+     "wants": [
+      {
+       "f": "configurable",
+       "w": 3
+      },
+      {
+       "f": "hosted",
+       "w": 1
+      }
+     ]
+    },
+    {
+     "v": "stack",
+     "t": "My own scripts and keys",
+     "d": "Headless runs, my machine, my rules",
+     "wants": [
+      {
+       "f": "configurable",
+       "w": 2
+      },
+      {
+       "f": "bot_driven",
+       "w": 2
+      },
+      {
+       "f": "ch_terminal",
+       "w": 1
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "practical",
+   "kicker": "Practicalities",
+   "q": "Now the practical stuff.",
+   "parts": [
+    {
+     "id": "volume",
+     "label": "How much you use it",
+     "options": [
+      {
+       "v": "light",
+       "t": "A few sessions a week"
+      },
+      {
+       "v": "daily",
+       "t": "A few hours a day",
+       "wants": [
+        {
+         "f": "headroom",
+         "w": 1.5
+        }
+       ]
+      },
+      {
+       "v": "heavy",
+       "t": "All day, I hit limits",
+       "wants": [
+        {
+         "f": "headroom",
+         "w": 3
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "id": "budget",
+     "label": "Monthly budget",
+     "options": [
+      {
+       "v": "20",
+       "t": "About $20",
+       "budget": 20,
+       "wants": [
+        {
+         "f": "cost_20",
+         "w": 2
+        }
+       ]
+      },
+      {
+       "v": "60",
+       "t": "About $60",
+       "budget": 60,
+       "wants": [
+        {
+         "f": "cost_60",
+         "w": 2
+        }
+       ]
+      },
+      {
+       "v": "100",
+       "t": "About $100",
+       "budget": 100,
+       "wants": [
+        {
+         "f": "cost_100",
+         "w": 2
+        }
+       ]
+      },
+      {
+       "v": "200",
+       "t": "About $200",
+       "budget": 200,
+       "wants": [
+        {
+         "f": "cost_200",
+         "w": 2
+        }
+       ]
+      },
+      {
+       "v": "company",
+       "t": "My company pays"
+      }
+     ]
+    },
+    {
+     "id": "ceiling",
+     "label": "Is that a hard ceiling?",
+     "options": [
+      {
+       "v": "hard",
+       "t": "Yes, hard ceiling",
+       "gates": [
+        {
+         "kind": "out",
+         "where": "over_budget",
+         "why": "Over your hard budget ceiling"
+        },
+        {
+         "kind": "warn",
+         "where": "no_fixed_price",
+         "why": "No fixed price: set a hard monthly cap on each key"
+        }
+       ]
+      },
+      {
+       "v": "flex",
+       "t": "Flexible if it's worth it",
+       "gates": [
+        {
+         "kind": "limit",
+         "where": "over_budget",
+         "factor": 0.9,
+         "why": "Costs more than your budget"
+        },
+        {
+         "kind": "limit",
+         "where": "far_over_budget",
+         "factor": 0.8,
+         "why": "Costs more than double your budget"
+        },
+        {
+         "kind": "warn",
+         "where": "no_fixed_price",
+         "why": "No fixed price: set a hard monthly cap on each key"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "id": "payg",
+     "label": "Pay-as-you-go API bills",
+     "options": [
+      {
+       "v": "ok",
+       "t": "Fine, with a cap"
+      },
+      {
+       "v": "avoid",
+       "t": "Avoid them",
+       "gates": [
+        {
+         "kind": "out",
+         "ids": [
+          "api_payg"
+         ],
+         "why": "You want no per-token bills"
+        },
+        {
+         "kind": "warn",
+         "families": [
+          "cursor"
+         ],
+         "why": "Past the included amount, Cursor bills on demand at API rates; set a spend limit"
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "checks": [
+  {
+   "id": "setup",
+   "outcomes": [
+    "api_payg"
+   ],
+   "unless": {
+    "control": [
+     "knobs",
+     "stack"
+    ]
+   },
+   "kicker": "One more thing",
+   "q": "Your best match is pay-as-you-go API keys. Are you up for setting up keys, budgets and the CLI yourself?",
+   "sub": "There is no plan price. You pay per token (Luna $0.10 / $0.50, Sonnet 5.5 $2 / $10, Opus 5.5 $4 / $20 per 1M) and set your own caps.",
+   "options": [
+    {
+     "v": "yes",
+     "t": "Yes, I'll set it up"
+    },
+    {
+     "v": "no",
+     "t": "No, take it off my list"
+    }
+   ],
+   "out_why": "You said no to setting up API keys"
+  },
+  {
+   "id": "dots",
+   "outcomes": [
+    "chatgpt_pro"
+   ],
+   "when": {
+    "musthave": [
+     "agent"
+    ]
+   },
+   "kicker": "One more thing",
+   "q": "Your best match leans on dots, which are not available in the EEA, UK or Switzerland. Are you outside those?",
+   "sub": "OpenAI's launch post lists dots for ChatGPT Pro, Business Premium and Enterprise in eligible markets.",
+   "options": [
+    {
+     "v": "yes",
+     "t": "Yes, dots are available to me"
+    },
+    {
+     "v": "no",
+     "t": "No, rule it out"
+    }
+   ],
+   "out_why": "Dots are not available where you are"
+  }
+ ],
+ "relax": [
+  {
+   "when": {
+    "ceiling": [
+     "hard"
+    ]
+   },
+   "set": {
+    "ceiling": "flex"
+   },
+   "label": "treated your budget as flexible"
+  },
+  {
+   "when": {
+    "budget": [
+     "20"
+    ]
+   },
+   "set": {
+    "budget": "60"
+   },
+   "label": "could spend about $60"
+  },
+  {
+   "when": {
+    "budget": [
+     "60"
+    ]
+   },
+   "set": {
+    "budget": "100"
+   },
+   "label": "could spend about $100"
+  },
+  {
+   "when": {
+    "budget": [
+     "100"
+    ]
+   },
+   "set": {
+    "budget": "200"
+   },
+   "label": "could spend about $200"
+  },
+  {
+   "when": {
+    "payg": [
+     "avoid"
+    ]
+   },
+   "set": {
+    "payg": "ok"
+   },
+   "label": "accepted a capped pay-as-you-go key"
+  },
+  {
+   "when": {
+    "setup": [
+     "no"
+    ]
+   },
+   "set": {
+    "setup": "yes"
+   },
+   "label": "were up for the API key setup"
+  },
+  {
+   "when": {
+    "dots": [
+     "no"
+    ]
+   },
+   "set": {
+    "dots": "yes"
+   },
+   "label": "had dots available"
+  },
+  {
+   "when": {
+    "control": [
+     "easy"
+    ]
+   },
+   "set": {
+    "control": "rules"
+   },
+   "label": "did a little setup"
+  }
+ ],
+ "unverified_general": [
+  "Cursor's Cursor Models pool size and Grok Bot weekly usage per tier are not published.",
+  "Codex Pro weekly limits and the differences between the $100, $200 and $500 tiers are not published.",
+  "Whether Claude Max 5x or 20x holds a heavy pace is not confirmed; Anthropic publishes multipliers, not dollar allowances.",
+  "AA Coding Agent Index values were read from the BenchLM mirror, not AA's own page.",
+  "GPT-6.1 Sol and GPT-6 Astra Terminal-Bench 4.0 scores came from a search snippet and a third-party summary.",
+  "Dots limits after the first month are not published.",
+  "Fit values (0 to 1) are our editorial judgments, each tied to the fact shown next to it."
+ ],
+ "api_addon": {
+  "t": "Optional: a capped OpenAI API key on GPT-6 Luna for bot and background jobs ($0.10 / $0.50 per 1M). Our report expects a few dollars a month for that use.",
+  "s": [
+   "openai_models",
+   "report_main"
+  ]
+ }
+}

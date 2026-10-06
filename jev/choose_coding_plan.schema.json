@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "schema_id": "choose_coding_plan",
+  "primitive": "choice",
+  "fail_mode": "fail_closed",
+  "dynamic_criteria": "state.candidates",
+  "rules": "choose_coding_plan.rules.json",
+  "questions": {
+    "decision": {
+      "type": "choice",
+      "instructions": "state.answers holds one person's answers to a quiz about AI coding tools and plans. state.engine.ranking is the deterministic rules ranking of the plans and stacks still allowed after their hard constraints (fit 0 to 1). Choose the single option id that best fits this person. Prefer the rules' top pick (state.engine.top) unless something in state.answers clearly makes it a worse fit than another remaining candidate. Never choose an id that is not a candidate.",
+      "criteria": {}
+    }
+  }
+}
