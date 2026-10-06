@@ -62,7 +62,7 @@ When you complete the quiz:
 - **POST /api/decide**: Live Jev decisions via TypeSafe System One SDK
 - **Rate limiting**: 10 requests/minute per IP via Cloudflare Rate Limiting
 - **Validation**: Answers schema, body size (4 KB), origin check (CORS)
-- **Secrets**: `TYPESAFE_API_KEY` (set with `wrangler secret put`)
+- **Secret**: `TYPESAFE_API_KEY` (already configured on the production Worker)
 
 ### Data
 - **Rules**: `jev/choose_coding_plan.rules.json` - single source of truth (questions, weights, outcomes, per-feature 0-1 scores with cited facts, thresholds)
@@ -99,7 +99,7 @@ coding-tool-picker/
 
 ### Prerequisites
 
-- Node.js 20+
+- Node.js 22+
 - npm or pnpm
 
 ### Setup
@@ -137,7 +137,7 @@ npm run dev
 ### Testing
 
 ```bash
-# Run unit tests
+# Compile the engine and run engine + Worker API tests
 npm test
 
 # Run persona tests (check all personas still match expected outcomes)
@@ -150,7 +150,9 @@ npm run test:personas
 
 ### Required Secrets
 
-Set these in your Cloudflare account:
+**For this repository**: `TYPESAFE_API_KEY` is already configured on the Worker.
+
+**For forks**: Set your own TypeSafe API key:
 
 ```bash
 # Set TypeSafe API key
@@ -235,13 +237,15 @@ Runs all personas through the engine and prints:
 ### Worker API Tests
 
 ```bash
-node src/worker.test.mjs
+npm test
 ```
 
-Conceptual validation of:
+The Worker API tests exercise:
+- Live System One success through a mocked SDK client
 - Answer validation
 - Missing API key fallback
 - Timeout fallback
+- Invalid live choice fallback
 - Rate limiting
 - Body size limits
 - CORS/origin checks

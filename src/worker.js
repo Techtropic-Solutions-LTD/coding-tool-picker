@@ -1,291 +1,271 @@
-// TypeSafe API endpoint
-const TYPESAFE_API = 'https://api.typesafe.ai/v1/systemone';
-
-// For now, import engine directly for bundling
-// In production these will be bundled by Wrangler
-let Engine, rules;
-try {
-  Engine = await import('../out/engine.js');
-  const rulesModule = await import('../jev/choose_coding_plan.rules.json', { with: { type: 'json' } });
-  rules = rulesModule.default;
-} catch (err) {
-  console.error('Engine import failed:', err);
-  // Will fall back to rules in handleDecide
-}
+import { APITimeoutError, TypeSafeClient } from "@typesafe-ai/sdk";
+import * as Engine from "../out/engine.js";
+import rules from "../jev/choose_coding_plan.rules.json" with { type: "json" };
+import questionPack from "../jev/choose_coding_plan.schema.json" with { type: "json" };
 
 const MODEL = Engine.compile(rules);
-const MAX_BODY_SIZE = 4 * 1024; // 4 KB
-const DECIDE_TIMEOUT = 8000; // 8 seconds
-
-// CORS and origin validation
-const ALLOWED_ORIGINS = [
-  'https://bot-picker.techtropic.io',
-  'https://coding-tool-picker.tom-94d.workers.dev'
-];
+const MAX_BODY_SIZE = 4 * 1024;
+const JEV_MODEL = "jev-latest";
+const JEV_TIMEOUT_MS = 8_000;
+const ALLOWED_ORIGINS = new Set([
+  "https://bot-picker.techtropic.io",
+  "https://coding-tool-picker.tom-94d.workers.dev",
+]);
 
 function corsHeaders(origin) {
-  if (ALLOWED_ORIGINS.includes(origin)) {
-    return {
-      'Access-Control-Allow-Origin': origin,
-      'Access-Control-Allow-Methods': 'POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type',
-      'Access-Control-Max-Age': '86400'
-    };
-  }
-  return {};
+  return ALLOWED_ORIGINS.has(origin)
+    ? {
+        "Access-Control-Allow-Origin": origin,
+        "Access-Control-Allow-Methods": "POST, OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type",
+        "Access-Control-Max-Age": "86400",
+        Vary: "Origin",
+      }
+    : {};
 }
 
-function jsonResponse(data, status = 200, headers = {}) {
-  return new Response(JSON.stringify(data), {
+function json(data, status = 200, headers = {}) {
+  return Response.json(data, {
     status,
-    headers: {
-      'Content-Type': 'application/json',
-      ...headers
-    }
+    headers: { ...corsHeaders(headers.origin), ...headers.extra },
   });
 }
 
-// Prepare Jev state from answers (same as browser prepareState)
-function prepareState(answers) {
-  const state = Engine.jevState(MODEL, { answers });
+function matches(answers, condition) {
+  return Boolean(
+    condition &&
+      Object.entries(condition).every(([key, values]) =>
+        values.includes(String(answers[key])),
+      ),
+  );
+}
+
+function hasOption(options, value) {
+  return options.some((option) => option.v === value);
+}
+
+function validAnswers(answers) {
+  if (!answers || typeof answers !== "object" || Array.isArray(answers)) {
+    return false;
+  }
+
+  const allowed = new Set(["priority"]);
+  for (const question of MODEL.rules.questions) {
+    if (question.parts) {
+      for (const part of question.parts) {
+        allowed.add(part.id);
+        if (!hasOption(part.options, answers[part.id])) return false;
+      }
+    } else if (question.multi) {
+      allowed.add(question.id);
+      const values = answers[question.id];
+      if (
+        !Array.isArray(values) ||
+        values.length === 0 ||
+        values.length > question.multi ||
+        new Set(values).size !== values.length ||
+        values.some((value) => !hasOption(question.options, value))
+      ) {
+        return false;
+      }
+    } else {
+      allowed.add(question.id);
+      if (!hasOption(question.options, answers[question.id])) return false;
+      if (question.follow) {
+        allowed.add(question.follow.id);
+        if (
+          !matches(answers, question.follow.unless) &&
+          !hasOption(question.follow.options, answers[question.follow.id])
+        ) {
+          return false;
+        }
+      }
+    }
+  }
+
+  for (const check of MODEL.rules.checks) {
+    allowed.add(check.id);
+    if (answers[check.id] != null && !hasOption(check.options, answers[check.id])) {
+      return false;
+    }
+  }
+
+  const priority = answers.priority;
+  if (priority != null) {
+    if (typeof priority !== "object" || Array.isArray(priority)) return false;
+    const validWeights = new Set([
+      MODEL.rules.thresholds.up,
+      MODEL.rules.thresholds.down,
+    ]);
+    if (
+      Object.entries(priority).some(
+        ([key, value]) => !MODEL.units.includes(key) || !validWeights.has(value),
+      )
+    ) {
+      return false;
+    }
+  }
+
+  return (
+    Object.keys(answers).every((key) => allowed.has(key)) &&
+    Engine.isComplete(MODEL, answers)
+  );
+}
+
+function rulesResponse(answers, source, error) {
+  const result = Engine.decideOffline(MODEL, { answers });
   return {
-    answers: state.answers,
-    candidates: state.candidates,
-    engine: state.engine
+    decision: result.output.decision,
+    confidence: result.confidence,
+    source,
+    model: result.model,
+    agrees_with_rules: true,
+    ranking: result.output.ranking,
+    output: result.output,
+    ...(error ? { error } : {}),
   };
 }
 
-// Validate answers match the schema structure
-function validateAnswers(answers) {
-  if (!answers || typeof answers !== 'object') {
-    return { valid: false, error: 'answers must be an object' };
-  }
-  
-  // Basic validation: check if it looks like quiz answers
-  const hasExpectedKeys = MODEL.rules.questions.some(q => {
-    if (q.parts) return q.parts.some(p => p.id in answers);
-    return q.id in answers;
-  });
-  
-  if (!hasExpectedKeys) {
-    return { valid: false, error: 'answers do not match quiz structure' };
-  }
-  
-  return { valid: true };
+function buildQuestions(candidates) {
+  const criteria = Object.fromEntries(
+    candidates.map((id) => {
+      const outcome = MODEL.byId[id];
+      return [id, `${outcome.name}: ${outcome.blurb}`];
+    }),
+  );
+  return {
+    decision: {
+      ...questionPack.questions.decision,
+      criteria,
+    },
+  };
 }
 
-async function handleDecide(request, env) {
-  const origin = request.headers.get('Origin');
-  
-  // CORS preflight
-  if (request.method === 'OPTIONS') {
+async function handleDecide(request, env, createClient) {
+  const origin = request.headers.get("Origin");
+  if (request.method === "OPTIONS") {
     return new Response(null, { status: 204, headers: corsHeaders(origin) });
   }
-  
-  // Origin check
-  if (!ALLOWED_ORIGINS.includes(origin)) {
-    return jsonResponse(
-      { error: 'Origin not allowed' },
-      403
-    );
+  if (!ALLOWED_ORIGINS.has(origin)) {
+    return json({ error: "Origin not allowed" }, 403);
   }
-  
-  // Rate limiting
-  const ip = request.headers.get('CF-Connecting-IP') || '0.0.0.0';
-  if (env.RATE_LIMITER) {
-    try {
-      const { success } = await env.RATE_LIMITER.limit({ key: ip });
-      if (!success) {
-        return jsonResponse(
-          { error: 'Rate limit exceeded', source: 'rules' },
-          429,
-          corsHeaders(origin)
-        );
-      }
-    } catch (err) {
-      console.error('Rate limiter error:', err);
-      // Continue without rate limiting if it fails
-    }
+
+  const rateLimit = await env.RATE_LIMITER.limit({
+    key: request.headers.get("CF-Connecting-IP") || "unknown",
+  });
+  if (!rateLimit.success) {
+    return json({ error: "Rate limit exceeded" }, 429, { origin });
   }
-  
-  // Body size check
-  const contentLength = parseInt(request.headers.get('Content-Length') || '0', 10);
-  if (contentLength > MAX_BODY_SIZE) {
-    return jsonResponse(
-      { error: 'Request body too large' },
-      413,
-      corsHeaders(origin)
-    );
+
+  const contentLength = Number(request.headers.get("Content-Length"));
+  if (Number.isFinite(contentLength) && contentLength > MAX_BODY_SIZE) {
+    return json({ error: "Request body too large" }, 413, { origin });
   }
-  
+
   let body;
   try {
     const text = await request.text();
-    if (text.length > MAX_BODY_SIZE) {
-      return jsonResponse(
-        { error: 'Request body too large' },
-        413,
-        corsHeaders(origin)
-      );
+    if (new TextEncoder().encode(text).byteLength > MAX_BODY_SIZE) {
+      return json({ error: "Request body too large" }, 413, { origin });
     }
     body = JSON.parse(text);
-  } catch (err) {
-    return jsonResponse(
-      { error: 'Invalid JSON' },
-      400,
-      corsHeaders(origin)
-    );
+  } catch {
+    return json({ error: "Invalid JSON" }, 400, { origin });
   }
-  
-  const { answers, model } = body;
-  
-  // Validate answers
-  const validation = validateAnswers(answers);
-  if (!validation.valid) {
-    return jsonResponse(
-      { error: validation.error },
-      400,
-      corsHeaders(origin)
-    );
+
+  if (!validAnswers(body?.answers)) {
+    return json({ error: "Answers are incomplete or invalid" }, 400, { origin });
   }
-  
-  // Prepare state for Jev
-  const state = prepareState(answers);
-  
-  // If no candidates or no API key, fall back to rules immediately
-  if (state.candidates.length === 0 || !env.TYPESAFE_API_KEY) {
-    const offline = Engine.decideOffline(MODEL, { answers });
-    return jsonResponse(
-      {
-        decision: offline.output.decision,
-        confidence: offline.confidence,
-        source: env.TYPESAFE_API_KEY ? 'rules' : 'rules_no_key',
-        agrees_with_rules: true,
-        ranking: offline.output.ranking,
-        output: offline.output
-      },
-      200,
-      corsHeaders(origin)
-    );
+
+  const answers = body.answers;
+  const state = Engine.jevState(MODEL, { answers });
+  if (!env.TYPESAFE_API_KEY) {
+    return json(rulesResponse(answers, "rules_no_key"), 200, { origin });
   }
-  
-  // Call TypeSafe System One
+  if (state.candidates.length === 0) {
+    return json(rulesResponse(answers, "rules"), 200, { origin });
+  }
+
   try {
-    // Check if TypeSafe SDK is available
-    // TODO: Uncomment when @typesafe-ai/sdk is installed
-    // const client = new TypeSafeClient({ apiKey: env.TYPESAFE_API_KEY });
-    
-    // For now, simulate what the SDK would do:
-    // Throw an error to fall back to rules
-    throw new Error('TypeSafe SDK not yet integrated');
-    
-    const questions = {
-      decision: {
-        type: 'choice',
-        instructions: `state.answers holds one person's answers to a quiz about AI coding tools and plans. state.engine.ranking is the deterministic rules ranking of the plans and stacks still allowed after their hard constraints (fit 0 to 1). Choose the single option id that best fits this person. Prefer the rules' top pick (state.engine.top) unless something in state.answers clearly makes it a worse fit than another remaining candidate. Never choose an id that is not a candidate.`,
-        criteria: Object.fromEntries(state.candidates.map(id => [id, true]))
-      }
-    };
-    
-    // When SDK is integrated, uncomment this:
-    /*
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), DECIDE_TIMEOUT);
-    
-    try {
-      const result = await client.systemOne({
-        state,
-        questions,
-        model: model || 'auto'
-      }, { signal: controller.signal });
-      
-      clearTimeout(timeoutId);
-      
-      const choice = result.answers?.decision?.choice;
-      const confidence = result.answers?.decision?.confidence || 0;
-      
-      // Validate Jev chose a valid candidate
-      if (!choice || !state.candidates.includes(choice)) {
-        throw new Error('Jev returned invalid choice');
-      }
-      
-      const output = Engine.planOutput(MODEL, { answers }, choice, confidence);
-      
-      return jsonResponse(
-        {
-          decision: choice,
-          confidence,
-          source: 'live',
-          model: result.model || 'jev',
-          agrees_with_rules: choice === state.engine.top,
-          ranking: output.ranking,
-          output
-        },
-        200,
-        corsHeaders(origin)
-      );
-      
-    } catch (err) {
-      clearTimeout(timeoutId);
-      
-      // Timeout or API error: fall back to rules
-      console.error('TypeSafe API error:', err.message);
-      const offline = Engine.decideOffline(MODEL, { answers });
-      
-      return jsonResponse(
-        {
-          decision: offline.output.decision,
-          confidence: offline.confidence,
-          source: 'rules_fallback',
-          error: err.name === 'AbortError' ? 'timeout' : 'api_error',
-          agrees_with_rules: true,
-          ranking: offline.output.ranking,
-          output: offline.output
-        },
-        200,
-        corsHeaders(origin)
-      );
-    }
-    
-  } catch (err) {
-    // API call failed: fall back to rules
-    console.error('TypeSafe API error:', err.message);
-    const offline = Engine.decideOffline(MODEL, { answers });
-    
-    return jsonResponse(
+    const client = createClient({
+      apiKey: env.TYPESAFE_API_KEY,
+      logLevel: "off",
+      retry: { maxRetries: 0 },
+    });
+    const result = await client.systemOne(
       {
-        decision: offline.output.decision,
-        confidence: offline.confidence,
-        source: 'rules_fallback',
-        error: 'api_error',
-        agrees_with_rules: true,
-        ranking: offline.output.ranking,
-        output: offline.output
+        state,
+        questions: buildQuestions(state.candidates),
+        model: JEV_MODEL,
+      },
+      { timeout: JEV_TIMEOUT_MS },
+    );
+    const decision = result.answers?.decision;
+    if (!decision || !state.candidates.includes(decision.choice)) {
+      throw new Error("TypeSafe returned a choice outside the candidate set");
+    }
+
+    const output = Engine.planOutput(
+      MODEL,
+      { answers },
+      decision.choice,
+      decision.confidence,
+    );
+    return json(
+      {
+        decision: decision.choice,
+        confidence: decision.confidence,
+        source: "live",
+        model: result.model,
+        agrees_with_rules: decision.choice === state.engine.top,
+        ranking: output.ranking,
+        output,
       },
       200,
-      corsHeaders(origin)
+      { origin },
+    );
+  } catch (error) {
+    const timeout =
+      error instanceof APITimeoutError || error?.name === "APITimeoutError";
+    console.error(
+      JSON.stringify({
+        message: "TypeSafe System One failed; using rules fallback",
+        error: error instanceof Error ? error.message : String(error),
+      }),
+    );
+    return json(
+      rulesResponse(
+        answers,
+        "rules_fallback",
+        timeout ? "timeout" : "api_error",
+      ),
+      200,
+      { origin },
     );
   }
 }
 
-export default {
-  async fetch(request, env, ctx) {
-    const url = new URL(request.url);
-    
-    // API routes
-    if (url.pathname === '/api/decide') {
-      if (request.method !== 'POST' && request.method !== 'OPTIONS') {
-        return new Response('Method not allowed', { status: 405 });
+export function createWorker(
+  createClient = (config) => new TypeSafeClient(config),
+) {
+  return {
+    async fetch(request, env) {
+      const { pathname } = new URL(request.url);
+      if (pathname === "/api/decide") {
+        if (request.method !== "POST" && request.method !== "OPTIONS") {
+          return new Response("Method not allowed", {
+            status: 405,
+            headers: { Allow: "POST, OPTIONS" },
+          });
+        }
+        return handleDecide(request, env, createClient);
       }
-      return handleDecide(request, env);
-    }
-    
-    // Health check
-    if (url.pathname === '/api/health') {
-      return jsonResponse({ status: 'ok', timestamp: new Date().toISOString() });
-    }
-    
-    // Serve static assets for everything else
-    return env.ASSETS.fetch(request);
-  }
-};
+      if (pathname === "/api/health") {
+        return json({ status: "ok" });
+      }
+      return env.ASSETS.fetch(request);
+    },
+  };
+}
+
+export default createWorker();

@@ -1,19 +1,23 @@
 name = "coding-tool-picker"
 main = "src/worker.js"
-compatibility_date = "2024-01-01"
+compatibility_date = "2026-10-01"
+compatibility_flags = ["nodejs_compat"]
 workers_dev = true
+
+[assets]
+directory = "./dist"
+binding = "ASSETS"
+html_handling = "auto-trailing-slash"
+not_found_handling = "single-page-application"
 
 [observability]
 enabled = true
-
-assets = { directory = "./dist", binding = "ASSETS", html_handling = "auto-trailing-slash", not_found_handling = "single-page-application" }
 
 [[routes]]
 pattern = "bot-picker.techtropic.io"
 custom_domain = true
 
-[[unsafe.bindings]]
+[[ratelimits]]
 name = "RATE_LIMITER"
-type = "ratelimit"
 namespace_id = "coding_tool_picker_rl"
 simple = { limit = 10, period = 60 }

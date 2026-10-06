@@ -1,118 +1,257 @@
-import { test } from "node:test";
 import assert from "node:assert/strict";
+import { test } from "node:test";
+import { APITimeoutError } from "@typesafe-ai/sdk";
+import { createWorker } from "./worker.js";
 
-// Mock TypeSafe client
-class MockTypeSafeClient {
-  constructor({ apiKey }) {
-    this.apiKey = apiKey;
+const ORIGIN = "https://bot-picker.techtropic.io";
+const VALID_ANSWERS = {
+  eco: "none",
+  work: ["infra", "product"],
+  where: ["terminal", "cloud"],
+  stakes: "high",
+  autonomy: "routines",
+  musthave: "agent",
+  model: "any",
+  control: "rules",
+  volume: "heavy",
+  budget: "60",
+  ceiling: "hard",
+  payg: "ok",
+  setup: "yes",
+  dots: "yes",
+};
+
+function request(method, path, body, origin = ORIGIN) {
+  const headers = new Headers({
+    "Content-Type": "application/json",
+    Origin: origin,
+  });
+  const init = { method, headers };
+  if (body !== undefined) {
+    init.body = typeof body === "string" ? body : JSON.stringify(body);
+    headers.set("Content-Length", String(new TextEncoder().encode(init.body).byteLength));
   }
-  
-  async systemOne({ state, questions, model }, options = {}) {
-    if (options.signal?.aborted) {
-      throw new Error('AbortError');
-    }
-    
-    // Simulate timeout if requested
-    if (model === 'timeout') {
-      await new Promise(resolve => setTimeout(resolve, 100));
-      if (options.signal) options.signal.throwIfAborted();
-    }
-    
-    // Return a valid choice from candidates
-    const choice = state.candidates[0];
-    return {
-      model: model || 'jev-test',
-      answers: {
-        decision: {
-          choice,
-          confidence: 0.85
-        }
-      }
-    };
-  }
+  return new Request(`${ORIGIN}${path}`, init);
 }
 
-test("Worker API /api/decide: validates answers structure", async () => {
-  const invalidInputs = [
-    {},
-    { answers: null },
-    { answers: "not-an-object" },
-    { answers: { random: "data" } }
-  ];
-  
-  for (const input of invalidInputs) {
-    // Would return 400 with validation error
-    assert.ok(true, "Validation would reject invalid input");
-  }
-});
-
-test("Worker API /api/decide: handles missing API key gracefully", async () => {
-  // When TYPESAFE_API_KEY is missing, should return rules-based decision with source: 'rules_no_key'
-  const answers = {
-    eco: "none",
-    work: ["infra"],
-    where: ["terminal"],
-    stakes: "high",
-    autonomy: "routines",
-    musthave: "agent",
-    model: "any",
-    control: "rules",
-    volume: "heavy",
-    budget: "60",
-    ceiling: "hard",
-    payg: "ok"
+function env(overrides = {}) {
+  return {
+    TYPESAFE_API_KEY: "test-key",
+    RATE_LIMITER: { limit: async () => ({ success: true }) },
+    ASSETS: { fetch: async () => new Response("index.html") },
+    ...overrides,
   };
-  
-  // Mock response would have source: 'rules_no_key'
-  assert.ok(true, "Falls back to rules when API key missing");
+}
+
+function mockWorker(systemOne, calls = {}) {
+  return createWorker((config) => {
+    calls.config = config;
+    return {
+      systemOne: async (...args) => {
+        calls.args = args;
+        return systemOne(...args);
+      },
+    };
+  });
+}
+
+test("live success exercises the System One client path", async () => {
+  const calls = {};
+  const worker = mockWorker(async ({ state }) => {
+    const choice = state.candidates[0];
+    return {
+      model: "jev-latest",
+      answers: {
+        decision: {
+          type: "choice",
+          choice,
+          confidence: 0.85,
+          probabilities: { [choice]: 0.85 },
+        },
+      },
+      usage: { input_tokens: 100, output_tokens: 10 },
+    };
+  }, calls);
+
+  const response = await worker.fetch(
+    request("POST", "/api/decide", { answers: VALID_ANSWERS }),
+    env(),
+  );
+  const data = await response.json();
+  const [payload, options] = calls.args;
+
+  assert.equal(response.status, 200);
+  assert.equal(data.source, "live");
+  assert.equal(data.decision, payload.state.candidates[0]);
+  assert.equal(data.confidence, 0.85);
+  assert.equal(data.model, "jev-latest");
+  assert.deepEqual(calls.config, {
+    apiKey: "test-key",
+    logLevel: "off",
+    retry: { maxRetries: 0 },
+  });
+  assert.equal(payload.model, "jev-latest");
+  assert.deepEqual(Object.keys(payload.questions), ["decision"]);
+  assert.equal(payload.questions.decision.type, "choice");
+  assert.deepEqual(
+    Object.keys(payload.questions.decision.criteria),
+    payload.state.candidates,
+  );
+  assert.deepEqual(options, { timeout: 8_000 });
 });
 
-test("Worker API /api/decide: handles TypeSafe timeout", async () => {
-  // When TypeSafe times out, should return rules-based decision with source: 'rules_fallback'
-  assert.ok(true, "Falls back to rules on timeout");
+test("timeout falls back to the deterministic rules result", async () => {
+  const worker = mockWorker(async () => {
+    throw new APITimeoutError(8_000);
+  });
+  const response = await worker.fetch(
+    request("POST", "/api/decide", { answers: VALID_ANSWERS }),
+    env(),
+  );
+  const data = await response.json();
+
+  assert.equal(response.status, 200);
+  assert.equal(data.source, "rules_fallback");
+  assert.equal(data.error, "timeout");
+  assert.equal(data.agrees_with_rules, true);
+  assert.ok(data.decision);
 });
 
-test("Worker API /api/decide: handles TypeSafe API error", async () => {
-  // When TypeSafe returns error, should return rules-based decision with source: 'rules_fallback'
-  assert.ok(true, "Falls back to rules on API error");
+test("a missing API key skips System One and uses rules", async () => {
+  let called = false;
+  const worker = mockWorker(async () => {
+    called = true;
+  });
+  const response = await worker.fetch(
+    request("POST", "/api/decide", { answers: VALID_ANSWERS }),
+    env({ TYPESAFE_API_KEY: undefined }),
+  );
+  const data = await response.json();
+
+  assert.equal(response.status, 200);
+  assert.equal(data.source, "rules_no_key");
+  assert.equal(data.agrees_with_rules, true);
+  assert.equal(called, false);
 });
 
-test("Worker API /api/decide: rejects oversized bodies", async () => {
-  // Requests over 4KB should be rejected with 413
-  const largeBody = { answers: { data: "x".repeat(5000) } };
-  assert.ok(true, "Rejects bodies over 4KB");
+test("a choice outside the candidate set falls back to rules", async () => {
+  const worker = mockWorker(async () => ({
+    model: "jev-latest",
+    answers: {
+      decision: {
+        type: "choice",
+        choice: "not-a-candidate",
+        confidence: 0.99,
+        probabilities: {},
+      },
+    },
+    usage: { input_tokens: 1, output_tokens: 1 },
+  }));
+  const response = await worker.fetch(
+    request("POST", "/api/decide", { answers: VALID_ANSWERS }),
+    env(),
+  );
+  const data = await response.json();
+
+  assert.equal(response.status, 200);
+  assert.equal(data.source, "rules_fallback");
+  assert.equal(data.error, "api_error");
+  assert.equal(data.agrees_with_rules, true);
 });
 
-test("Worker API /api/decide: enforces rate limits", async () => {
-  // More than 10 requests/minute from same IP should return 429
-  assert.ok(true, "Rate limiting works");
+test("rate-limited requests return 429 before calling System One", async () => {
+  let called = false;
+  const worker = mockWorker(async () => {
+    called = true;
+  });
+  const response = await worker.fetch(
+    request("POST", "/api/decide", { answers: VALID_ANSWERS }),
+    env({ RATE_LIMITER: { limit: async () => ({ success: false }) } }),
+  );
+
+  assert.equal(response.status, 429);
+  assert.equal((await response.json()).error, "Rate limit exceeded");
+  assert.equal(called, false);
 });
 
-test("Worker API /api/decide: validates Jev choice is a candidate", async () => {
-  // If Jev returns a choice not in candidates, should fail closed
-  assert.ok(true, "Validates Jev chose from candidates");
+test("bad JSON and invalid answers return 400", async (t) => {
+  const worker = mockWorker(async () => assert.fail("System One was called"));
+
+  await t.test("bad JSON", async () => {
+    const response = await worker.fetch(
+      request("POST", "/api/decide", "{bad"),
+      env(),
+    );
+    assert.equal(response.status, 400);
+    assert.equal((await response.json()).error, "Invalid JSON");
+  });
+
+  await t.test("invalid answers", async () => {
+    const response = await worker.fetch(
+      request("POST", "/api/decide", { answers: { eco: "invalid" } }),
+      env(),
+    );
+    assert.equal(response.status, 400);
+    assert.equal(
+      (await response.json()).error,
+      "Answers are incomplete or invalid",
+    );
+  });
 });
 
-test("Worker API /api/decide: successful live decision", async () => {
-  const answers = {
-    eco: "claude",
-    lock: "all",
-    work: ["infra"],
-    where: ["terminal"],
-    stakes: "high",
-    autonomy: "long",
-    musthave: "none",
-    model: "mine",
-    control: "knobs",
-    volume: "heavy",
-    budget: "100",
-    ceiling: "flex",
-    payg: "ok"
-  };
-  
-  // Mock successful TypeSafe call would return source: 'live', decision, confidence
-  assert.ok(true, "Live decision succeeds with valid API key");
+test("an oversized body returns 413", async () => {
+  const worker = mockWorker(async () => assert.fail("System One was called"));
+  const response = await worker.fetch(
+    request("POST", "/api/decide", {
+      answers: { ...VALID_ANSWERS, extra: "x".repeat(5_000) },
+    }),
+    env(),
+  );
+
+  assert.equal(response.status, 413);
+  assert.equal((await response.json()).error, "Request body too large");
 });
 
-console.log("Worker API tests: conceptual validation passed");
-console.log("Note: Full integration tests require actual Worker environment");
+test("a disallowed origin returns 403 without CORS headers", async () => {
+  const worker = mockWorker(async () => assert.fail("System One was called"));
+  const response = await worker.fetch(
+    request(
+      "POST",
+      "/api/decide",
+      { answers: VALID_ANSWERS },
+      "https://example.invalid",
+    ),
+    env(),
+  );
+
+  assert.equal(response.status, 403);
+  assert.equal((await response.json()).error, "Origin not allowed");
+  assert.equal(response.headers.get("Access-Control-Allow-Origin"), null);
+});
+
+test("allowed preflight, health, method, and asset routes work", async (t) => {
+  const worker = mockWorker(async () => assert.fail("System One was called"));
+
+  await t.test("preflight", async () => {
+    const response = await worker.fetch(request("OPTIONS", "/api/decide"), env());
+    assert.equal(response.status, 204);
+    assert.equal(response.headers.get("Access-Control-Allow-Origin"), ORIGIN);
+  });
+
+  await t.test("health", async () => {
+    const response = await worker.fetch(request("GET", "/api/health"), env());
+    assert.equal(response.status, 200);
+    assert.deepEqual(await response.json(), { status: "ok" });
+  });
+
+  await t.test("method", async () => {
+    const response = await worker.fetch(request("GET", "/api/decide"), env());
+    assert.equal(response.status, 405);
+    assert.equal(response.headers.get("Allow"), "POST, OPTIONS");
+  });
+
+  await t.test("assets", async () => {
+    const response = await worker.fetch(request("GET", "/"), env());
+    assert.equal(await response.text(), "index.html");
+  });
+});
