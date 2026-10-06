@@ -1,0 +1,24 @@
+{
+  "name": "coding-tool-picker",
+  "version": "1.0.0",
+  "description": "Quiz to help pick an AI coding tool and plan, powered by the Jev decision engine",
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs",
+    "pretest": "tsc",
+    "test": "node --test jev/coding-plan.test.mjs src/worker.test.mjs",
+    "test:personas": "node jev/personas.mjs",
+    "dev": "npm run build && npx wrangler dev",
+    "deploy": "npm run build && npx wrangler deploy"
+  },
+  "keywords": ["cursor", "claude", "codex", "ai-coding", "decision-engine"],
+  "author": "Techtropic",
+  "license": "MIT",
+  "dependencies": {
+    "@typesafe-ai/sdk": "^0.6.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.2",
+    "wrangler": "^4.0.0"
+  }
+}
